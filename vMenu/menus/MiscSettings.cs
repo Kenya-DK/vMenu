@@ -36,6 +36,7 @@ namespace vMenuClient
         public bool ShowPropModelDimensions { get; private set; } = false;
         public bool ShowEntityHandles { get; private set; } = false;
         public bool ShowEntityModels { get; private set; } = false;
+        public bool ShowEntityDebugger { get; private set; } = false;
         public bool ShowEntityNetOwners { get; private set; } = false;
         public bool MiscRespawnDefaultCharacter { get; private set; } = UserDefaults.MiscRespawnDefaultCharacter;
         public bool RestorePlayerAppearance { get; private set; } = UserDefaults.MiscRestorePlayerAppearance;
@@ -133,6 +134,7 @@ namespace vMenuClient
             MenuSliderItem dimensionsDistanceSlider = new MenuSliderItem("Show Dimensions Radius", "Show entity model/handle/dimension draw range.", 0, 20, 20, false);
 
             MenuItem clearArea = new MenuItem("Clear Area", "Clears the area around your player (100 meters). Damage, dirt, peds, props, vehicles, etc. Everything gets cleaned up, fixed and reset to the default world state.");
+            MenuCheckboxItem entityDebugger = new MenuCheckboxItem("Entity Debugger", "Show Entity Debugger.");
             MenuCheckboxItem lockCamX = new MenuCheckboxItem("Lock Camera Horizontal Rotation", "Locks your camera horizontal rotation. Could be useful in helicopters I guess.", false);
             MenuCheckboxItem lockCamY = new MenuCheckboxItem("Lock Camera Vertical Rotation", "Locks your camera vertical rotation. Could be useful in helicopters I guess.", false);
 
@@ -141,7 +143,7 @@ namespace vMenuClient
             MenuItem confirmEntityPosition = new MenuItem("Confirm Entity Position", "Stops placing entity and sets it at it current location.");
             MenuItem cancelEntity = new MenuItem("Cancel", "Deletes current entity and cancels its placement");
             MenuItem confirmAndDuplicate = new MenuItem("Confirm Entity Position And Duplicate", "Stops placing entity and sets it at it current location and creates new one to place.");
-            
+
             Menu connectionSubmenu = new Menu(Game.Player.Name, "Connection Options");
             MenuItem connectionSubmenuBtn = new MenuItem("Connection Options", "Server connection/game quit options.");
 
@@ -403,7 +405,10 @@ namespace vMenuClient
             {
                 developerToolsMenu.AddMenuItem(coords);
             }
-
+            if (IsAllowed(Permission.MSEntityDebugger))
+            {
+                developerToolsMenu.AddMenuItem(entityDebugger);
+            }
             // model outlines
             if (!vMenuShared.ConfigManager.GetSettingsBool(vMenuShared.ConfigManager.Setting.vmenu_disable_entity_outlines_tool))
             {
@@ -489,6 +494,10 @@ namespace vMenuClient
                 {
                     ShowEntityModels = _checked;
                 }
+                else if (item == entityDebugger)
+                {
+                    ShowEntityDebugger = _checked;
+                }
                 else if (item == showEntityNetOwners)
                 {
                     ShowEntityNetOwners = _checked;
@@ -515,7 +524,7 @@ namespace vMenuClient
                 MenuItem entSpawnerMenuBtn = new MenuItem("Entity Spawner", "Spawn and move entities") { Label = "→→→" };
                 developerToolsMenu.AddMenuItem(entSpawnerMenuBtn);
                 MenuController.BindMenuItem(developerToolsMenu, entitySpawnerMenu, entSpawnerMenuBtn);
-                
+
                 entitySpawnerMenu.AddMenuItem(spawnNewEntity);
                 entitySpawnerMenu.AddMenuItem(confirmEntityPosition);
                 entitySpawnerMenu.AddMenuItem(confirmAndDuplicate);
@@ -530,7 +539,7 @@ namespace vMenuClient
                             Notify.Error("You are already placing one entity, set its location or cancel and try again!");
                             return;
                         }
-                        
+
                         string result = await GetUserInput(windowTitle: "Enter model name");
 
                         if (String.IsNullOrEmpty(result))
@@ -539,7 +548,8 @@ namespace vMenuClient
                         }
 
                         EntitySpawner.SpawnEntity(result, Game.PlayerPed.Position);
-                    } else if (item == confirmEntityPosition || item == confirmAndDuplicate)
+                    }
+                    else if (item == confirmEntityPosition || item == confirmAndDuplicate)
                     {
                         if (EntitySpawner.CurrentEntity != null)
                         {
@@ -549,7 +559,8 @@ namespace vMenuClient
                         {
                             Notify.Error("No entity to confirm position for!");
                         }
-                    } else if (item == cancelEntity)
+                    }
+                    else if (item == cancelEntity)
                     {
                         if (EntitySpawner.CurrentEntity != null)
                         {

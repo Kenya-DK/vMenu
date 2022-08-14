@@ -20,6 +20,7 @@ namespace vMenuClient
 
         public bool UnlimitedAmmo { get; private set; } = UserDefaults.WeaponsUnlimitedAmmo;
         public bool NoReload { get; private set; } = UserDefaults.WeaponsNoReload;
+        public bool RapidFire { get; private set; } = UserDefaults.WeaponsRapidFire;
         public bool AutoEquipChute { get; private set; } = UserDefaults.AutoEquipChute;
         public bool UnlimitedParachutes { get; private set; } = UserDefaults.WeaponsUnlimitedParachutes;
 
@@ -46,6 +47,7 @@ namespace vMenuClient
             MenuItem removeAllWeapons = new MenuItem("Remove All Weapons", "Removes all weapons in your inventory.");
             MenuCheckboxItem unlimitedAmmo = new MenuCheckboxItem("Unlimited Ammo", "Unlimited ammonition supply.", UnlimitedAmmo);
             MenuCheckboxItem noReload = new MenuCheckboxItem("No Reload", "Never reload.", NoReload);
+            MenuCheckboxItem rapidfire = new MenuCheckboxItem("Rapid Fire", "All weapons is a minigun.", RapidFire);
             MenuItem setAmmo = new MenuItem("Set All Ammo Count", "Set the amount of ammo in all your weapons.");
             MenuItem refillMaxAmmo = new MenuItem("Refill All Ammo", "Give all your weapons max ammo.");
             MenuItem spawnByName = new MenuItem("Spawn Weapon By Name", "Enter a weapon mode name to spawn.");
@@ -66,6 +68,10 @@ namespace vMenuClient
             if (IsAllowed(Permission.WPNoReload))
             {
                 menu.AddMenuItem(noReload);
+            }
+            if (IsAllowed(Permission.WPRapidFire))
+            {
+                menu.AddMenuItem(rapidfire);
             }
             if (IsAllowed(Permission.WPSetAllAmmo))
             {
@@ -696,6 +702,11 @@ namespace vMenuClient
                 {
                     UnlimitedAmmo = _checked;
                     Subtitle.Custom($"Unlimited ammo is now {(_checked ? "enabled" : "disabled")}.");
+                }
+                else if (item == rapidfire)
+                {
+                    RapidFire = _checked;
+                    Subtitle.Custom($"Rapid fire now {(_checked ? "enabled" : "disabled")}.");
                 }
             };
             #endregion

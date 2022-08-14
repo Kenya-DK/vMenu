@@ -12,6 +12,8 @@ using static vMenuClient.CommonFunctions;
 using static vMenuShared.ConfigManager;
 using static vMenuShared.PermissionsManager;
 using static vMenuClient.data.PedModels;
+using System.Drawing;
+using CitizenFX.Core.Native;
 
 namespace vMenuClient
 {
@@ -56,6 +58,14 @@ namespace vMenuClient
         private readonly int KeyDelay = 15;
         private bool ForceEnabled = false;
         private bool StartPush = false;
+        /// EntityDebugger
+
+        public Entity _trackingEntity;
+        private bool _track;
+        private static readonly Color DefaultCrosshair = Color.FromArgb(120, 120, 120);
+        private static readonly Color ActiveCrosshair = Color.FromArgb(255, 0, 0);
+
+        private static readonly Vector2 DefaultPos = new Vector2(0.6f, 0.5f);
 
         private bool stopPropsLoop = false;
         private bool stopVehiclesLoop = false;
@@ -607,7 +617,11 @@ namespace vMenuClient
                     {
                         ped.RemoveHelmet(true);
                     }
-
+                    if (MainMenu.VehicleOptionsMenu.VehicleBoost && IsControlPressed(0, 209) && IsAllowed(Permission.VOBoost))
+                    {
+                        //Notify.Error("VehicleBoost: " + MainMenu.VehicleOptionsMenu.VehicleBoost);
+                        SetVehicleForwardSpeed(GetVehiclePedIsUsing(GetPlayerPed(-1)), 250.0F);
+                    }
                     if (MainMenu.VehicleOptionsMenu.VehicleInfiniteFuel && DecorIsRegisteredAsType("_Fuel_Level", 1) && IsAllowed(Permission.VOInfiniteFuel))
                     {
                         float maxFuelLevel = GetVehicleHandlingFloat(veh.Handle, "CHandlingData", "fPetrolTankVolume");
@@ -837,6 +851,11 @@ namespace vMenuClient
             if (MainMenu.MiscSettingsMenu.ShowSpeedoMph && Game.PlayerPed.IsInVehicle())
             {
                 ShowSpeedMph();
+            }
+            if (MainMenu.MiscSettingsMenu.ShowEntityDebugger)
+            {
+            DrawCrosshair(DefaultCrosshair);
+                ShowEntityDebugger();
             }
             await Task.FromResult(0);
         }
@@ -1399,6 +1418,156 @@ namespace vMenuClient
             await Task.FromResult(0);
         }
         #endregion
+
+        #region Show Entity Debugger
+
+        #endregion
+        /// <summary>
+        /// Shows Entity Debugger
+        /// </summary>
+        private void ShowEntityDebugger()
+        {
+            try
+            {
+                var rightClick = Game.IsControlPressed(2, Control.Aim);
+                if (rightClick)
+                {
+                    _trackingEntity = GetEntityInCrosshair();
+                    if (_trackingEntity == null)
+                        _track = false;
+
+                    if (_trackingEntity == null && !_track)
+                    {
+                        _trackingEntity = GetEntityInCrosshair();
+                    }
+
+
+                }
+                var color = DefaultCrosshair;
+                if (_trackingEntity != null || GetEntityInCrosshair() != null)
+                {
+                    color = ActiveCrosshair;
+                }
+
+                DrawCrosshair(color);
+
+                if (_trackingEntity != null)
+                {
+                    if (rightClick)
+                    {
+                        _track = true;
+                    }
+                    var playerPos = Game.PlayerPed.Position;
+                    if (!_trackingEntity.Exists() || playerPos.DistanceToSquared(_trackingEntity.Position) > 1000f)
+                    {
+                        _track = false;
+                        _trackingEntity = null;
+                        return;
+                    }
+
+                    DrawData(_trackingEntity);
+                }
+            }
+            catch (Exception ex)
+            {
+                Notify.Error(ex.Message);
+            }
+        }
+        private Entity GetEntityInCrosshair()
+        {
+            var raycast = World.Raycast(GameplayCamera.Position, CameraForwardVec(), 100f, IntersectOptions.Everything, Game.PlayerPed);
+            if (!raycast.DitHit || !raycast.DitHitEntity || raycast.HitPosition == default)
+            {
+                return null;
+            }
+            return raycast.HitEntity;
+        }
+
+        private Vector3 CameraForwardVec()
+        {
+            var rotation = (float)(Math.PI / 180.0) * Function.Call<Vector3>(Hash.GET_GAMEPLAY_CAM_ROT, 2);
+            return Vector3.Normalize(new Vector3((float)-Math.Sin(rotation.Z) * (float)Math.Abs(Math.Cos(rotation.X)), (float)Math.Cos(rotation.Z) * (float)Math.Abs(Math.Cos(rotation.X)), (float)Math.Sin(rotation.X)));
+        }
+
+        private void DrawData(Entity entity)
+        {
+            var entityPos = entity.Position;
+            var pos = WorldToScreen(entityPos);
+            if (pos.X <= 0f || pos.Y <= 0f || pos.X >= 1f || pos.Y >= 1f)
+            {
+                pos = DefaultPos;
+            }
+            var dist = (float)Math.Sqrt(Game.PlayerPed.Position.DistanceToSquared(entityPos));
+            var offsetX = MathUtil.Clamp((1f - dist / 100f) * 0.1f, 0f, 0.1f);
+            pos.X += offsetX;
+
+            var data = GetDataFor(entity);
+
+            // Draw Box
+            DrawRect(pos.X + 0.12f, pos.Y, 0.24f, data.Count * 0.024f + 0.048f, Color.FromArgb(120, 0, 0, 0));
+
+            var offsetY = data.Count * 0.012f;
+            pos.Y -= offsetY;
+
+            pos.X += 0.02f;
+            // Draw data
+            foreach (var entry in data)
+            {
+                if (!string.IsNullOrEmpty(entry.Value))
+                    DrawText($"{entry.Key}: {entry.Value}", pos);
+                pos.Y += 0.024f;
+            }
+        }
+        private Dictionary<string, string> GetDataFor(Entity entity)
+        {
+            var list = new Dictionary<string, string>();
+            try
+            {
+                var pos = entity.Position;
+                var rot = entity.Rotation;
+                var vel = entity.Velocity;
+                list["Model Name"] = GetModelName(entity.Model);
+                list["Model Hash"] = $"{entity.Model.Hash}";
+                list["Model Hash (Hex)"] = $"0x{entity.Model.Hash:X}";
+                list[""] = "";
+
+                var player = Players.FirstOrDefault(p => p.Character == entity);
+                if (player != null)
+                {
+                    list["Player Name"] = player.Name;
+                    list["Server ID"] = $"{player.ServerId}";
+                    list["Is Talking"] = $"{(CitizenFX.Core.Native.Function.Call<bool>(Hash.NETWORK_IS_PLAYER_TALKING, player) ? "~g~True" : "~r~False")}~s~";
+                    list["  "] = "";
+                    list["Health"] = $"{player.Character.Health} / {player.Character.MaxHealth}";
+                    list["Invincible"] = $"{(player.IsInvincible ? "~g~True" : "~r~False")}~s~";
+                }
+                else if (entity is Vehicle veh)
+                {
+                    list["Engine Health"] = $"{veh.EngineHealth:n1} / 1,000.0";
+                    list["Body Health"] = $"{veh.BodyHealth:n1} / 1,000.0";
+                    list["Number Plate"] = $"{GetVehicleNumberPlateText(veh.Handle)}";
+                    list["Speed"] = $"{veh.Speed / 0.621371f:n3} MP/H";
+                    list["RPM"] = $"{veh.CurrentRPM:n3}";
+                    list["Current Gear"] = $"{veh.CurrentGear}";
+                    list["Acceleration"] = $"{veh.Acceleration:n3}";
+                }
+                else
+                {
+                    list["Health"] = $"{entity.Health} / {entity.MaxHealth}";
+                }
+                list[" "] = "";
+                list["Distance"] = $"{Math.Sqrt(Game.PlayerPed.Position.DistanceToSquared(entity.Position)):n3} Meters";
+                list["Heading"] = $"{entity.Heading:n3}";
+                list["Position"] = $"{pos.X:n5} {pos.Y:n5} {pos.Z:n5}";
+                list["Rotation"] = $"{rot.X:n5} {rot.Y:n5} {rot.Z:n5}";
+                list["Velocity"] = $"{vel.X:n5} {vel.Y:n5} {vel.Z:n5}";
+            }
+            catch (Exception ex)
+            {
+                Notify.Error(ex.Message);
+            }
+            return list;
+        }
         #endregion
 
         #region Voice Chat Tasks
@@ -1520,6 +1689,25 @@ namespace vMenuClient
                 SetAmmoInClip(Game.PlayerPed.Handle, (uint)Game.PlayerPed.Weapons.Current.Hash, 5);
             }
 
+            // Enable/disable rapidfire.
+            if (Game.PlayerPed.Weapons.Current != null && Game.PlayerPed.Weapons.Current.Hash != WeaponHash.Unarmed)
+            {
+                if (MainMenu.WeaponOptionsMenu.RapidFire && IsControlPressed(0, 24) && IsAllowed(Permission.WPRapidFire))
+                {
+                    DisablePlayerFiring(Game.PlayerPed.Handle, true);
+                    Weapon weapon = Game.PlayerPed.Weapons.Current;
+                    int wepent = GetCurrentPedWeaponEntityIndex(Game.PlayerPed.Handle);
+                    Vector3 camDir = GetCamDirFromScreenCenter();
+                    Vector3 camPos = GetGameplayCamCoord();
+                    Vector3 launchPos = GetEntityCoords(wepent, true);
+                    Vector3 targetPos = camPos + OperationsP(camDir, 200.0f);
+
+                    ClearAreaOfProjectiles(launchPos.X, launchPos.Y, launchPos.Z, 0.0f, true);
+
+                    ShootSingleBulletBetweenCoords(launchPos.X, launchPos.Y, launchPos.Z, targetPos.X, targetPos.Y, targetPos.Z, 5, true, (uint)weapon.Hash, PlayerPedId(), true, true, 12000.0f);
+                }
+            }
+
             // Enable/disable infinite ammo.
             if (Game.PlayerPed.Weapons.Current != null && Game.PlayerPed.Weapons.Current.Hash != WeaponHash.Unarmed)
             {
@@ -1549,6 +1737,77 @@ namespace vMenuClient
                 }
             }
             await Task.FromResult(0);
+        }
+        public static Vector3 GetCamDirFromScreenCenter()
+        {
+            Vector3 pos = GetGameplayCamCoord();
+            Vector3 world =  ScreenToWorld(0, 0);
+            Vector3 ret = SubVectors(world, pos);
+            return ret;
+        }
+        public static Vector3 ScreenToWorld(int x, int y)
+        {
+            Vector3 camRot = GetGameplayCamRot(2);
+            Vector3 camPos = GetGameplayCamCoord();
+
+            float vect2x = 0.0f;
+            float vect2y = 0.0f;
+            float vect21y = 0.0f;
+            float vect21x = 0.0f;
+            Vector3 direction = RotationToDirection(camRot);
+            Vector3 vect3 = new Vector3(camRot.X + 10.0f, camRot.Y + 0.0f, camRot.Z + 0.0f);
+            Vector3 vect31 = new Vector3(camRot.X - 10.0f, camRot.Y + 0.0f, camRot.Z + 0.0f);
+            Vector3 vect32 = new Vector3(camRot.X, camRot.Y + 0.0f, camRot.Z + -10.0f);
+            Vector3 direction1 = RotationToDirection(new Vector3(camRot.X, camRot.Y + 0.0f, camRot.Z + 10.0f)) - RotationToDirection(vect32);
+            Vector3 direction2 = RotationToDirection(vect3) - RotationToDirection(vect31);
+            double radians = -(rad_from_deg(camRot.Y));
+
+            Vector3 vect33 = OperationsP(direction1, (float)Math.Cos(radians)) - OperationsP(direction2, (float)Math.Sin(radians));
+            Vector3 vect34 = OperationsP(direction1, (float)Math.Sin(radians)) - OperationsP(direction2, (float)Math.Cos(radians));
+            float x1 = 0;
+            float y1 = 0;
+            bool case1 = WorldToScreenRel(((camPos + OperationsP(direction, 10.0f)) + vect33) + vect34, ref x1, ref y1);
+            if (!case1)
+            {
+                vect2x = x1;
+                vect2y = y1;
+                return camPos + OperationsP(direction, 10.0f);
+
+            }
+            float x2 = 0;
+            float y2 = 0;
+            bool case2 = WorldToScreenRel(camPos + OperationsP(direction, 10.0f), ref x1, ref y1);
+            if (!case2)
+            {
+                vect21x = x2;
+                vect21y = y2;
+                return camPos + OperationsP(direction, 10.0f);
+            }
+            if (Math.Abs(vect2x - vect21x) < 0.001 || Math.Abs(vect2y - vect21y) < 0.001)
+            {
+                return camPos + OperationsP(direction, 10.0f);
+            }
+
+            var x3 = (x - vect21x) / (vect2x - vect21x);
+            var y3 = (y - vect21y) / (vect2y - vect21y);
+            return ((camPos + OperationsP(direction, 10.0f)) + (vect33 * x3)) + (vect34 * y3);
+        }
+        public static Vector3 OperationsP(Vector3 vect, float multiplaie)
+        {
+            return new Vector3(vect.X * multiplaie, vect.Y * multiplaie, vect.Z * multiplaie);
+        }
+        public static bool WorldToScreenRel(Vector3 worldCoords, ref float screenCoordsx, ref float screenCoordsy)
+        {
+            float x = 0;
+            float y = 0;
+            bool check = GetScreenCoordFromWorldCoord(worldCoords.X, worldCoords.Y, worldCoords.Z, ref x, ref y);
+            if (!check)
+                return false;
+
+
+            screenCoordsx = (x - 0.5f) * 2.0f;
+            screenCoordsy = (y - 0.5f) * 2.0f;
+            return true;
         }
         #endregion
 

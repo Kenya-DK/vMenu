@@ -20,6 +20,7 @@ namespace vMenuClient
 
         internal static bool DriveToWpTaskActive = false;
         internal static bool DriveWanderTaskActive = false;
+        public static readonly System.Drawing.Color DefaultColor = System.Drawing.Color.FromArgb(255, 255, 255);
         #endregion
 
         #region some misc functions copied from base script
@@ -2959,6 +2960,33 @@ namespace vMenuClient
         }
         #endregion
 
+        #region Get Model Name
+        /// <summary>
+        /// Get the model name from model.
+        /// </summary>
+        /// <param name="model">The Model</param>
+        /// <returns></returns>
+        public static string GetModelName(Model model)
+        {
+            var name = "";
+            if (model.IsVehicle)
+            {
+                name = Enum.GetName(typeof(VehicleHash), (VehicleHash)model.Hash) ?? "";
+            }
+
+            if (model.IsProp)
+            {
+                name = Enum.GetName(typeof(PedHash), (PedHash)model.Hash) ?? "";
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                name = Enum.GetName(typeof(PedHash), (PedHash)model.Hash) ?? "Unknown";
+            }
+            return name;
+        }
+
+        #endregion
         #region Draw model dimensions math util functions
 
         /*
@@ -3366,6 +3394,58 @@ namespace vMenuClient
             }
             TriggerServerEvent("vMenu:SaveTeleportLocation", JsonConvert.SerializeObject(new vMenuShared.ConfigManager.TeleportLocation(locationName, pos, heading)));
             Notify.Success("The location was successfully saved.");
+        }
+        #endregion
+        #region Crosshair
+        public static void DrawCrosshair(System.Drawing.Color? crosshairColor = null)
+        {
+            var color = crosshairColor ?? DefaultColor;
+            DrawRect(0.5f, 0.5f, 0.008333333f, 0.001851852f, color);
+            DrawRect(0.5f, 0.5f, 0.001041666f, 0.014814814f, color);
+        }
+        public static void DrawRect(float xPos, float yPos, float xScale, float yScale, System.Drawing.Color color)
+        {
+            try
+            {
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash.DRAW_RECT, xPos, yPos, xScale, yScale, color.R, color.G, color.B, color.A);
+            }
+            catch (Exception ex)
+            {
+                Notify.Error(ex.Message);
+            }
+        }
+        public static void DrawText(string text, Vector2 pos, System.Drawing.Color? color = null, float scale = 0.25f,
+    bool shadow = false, float shadowOffset = 1f, CitizenFX.Core.UI.Alignment alignment = CitizenFX.Core.UI.Alignment.Left, CitizenFX.Core.UI.Font font = CitizenFX.Core.UI.Font.ChaletLondon)
+        {
+            try
+            {
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash.SET_TEXT_FONT, font);
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash.SET_TEXT_PROPORTIONAL, 0);
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash.SET_TEXT_SCALE, scale, scale);
+                if (shadow)
+                {
+                    CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash.SET_TEXT_DROPSHADOW, shadowOffset, 0, 0, 0, 255);
+                }
+                var col = color ?? DefaultColor;
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash.SET_TEXT_COLOUR, col.R, col.G, col.B, col.A);
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash.SET_TEXT_EDGE, 1, 0, 0, 0, 255);
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash.SET_TEXT_JUSTIFICATION, alignment);
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash._SET_TEXT_ENTRY, "STRING");
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, text);
+                CitizenFX.Core.Native.Function.Call(CitizenFX.Core.Native.Hash._DRAW_TEXT, pos.X, pos.Y);
+            }
+            catch (Exception ex)
+            {
+                Notify.Error(ex.Message);
+            }
+        }
+        public static Vector2 WorldToScreen(Vector3 position)
+        {
+            var screenX = new CitizenFX.Core.Native.OutputArgument();
+            var screenY = new CitizenFX.Core.Native.OutputArgument();
+            return !CitizenFX.Core.Native.Function.Call<bool>(CitizenFX.Core.Native.Hash._WORLD3D_TO_SCREEN2D, position.X, position.Y, position.Z, screenX, screenY) ?
+                Vector2.Zero :
+                new Vector2(screenX.GetResult<float>(), screenY.GetResult<float>());
         }
         #endregion
     }

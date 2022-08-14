@@ -167,7 +167,11 @@ namespace vMenuClient
             get { return GetSettingsBool("vehicleBikeSeatbelt"); }
             set { SetSavedSettingsBool("vehicleBikeSeatbelt", value); }
         }
-        
+        public static bool VehicleBoost
+        {
+            get { return GetSettingsBool("vehicleBoost"); }
+            set { SetSavedSettingsBool("vehicleBoost", value); }
+        }
         public static int VehicleDefaultRadio
         {
             get { return GetSettingsInt("vehicleDefaultRadio"); }
@@ -195,7 +199,11 @@ namespace vMenuClient
             get { return GetSettingsBool("weaponsNoReload"); }
             set { SetSavedSettingsBool("weaponsNoReload", value); }
         }
-
+        public static bool WeaponsRapidFire
+        {
+            get { return GetSettingsBool("weaponsRapidFire"); }
+            set { SetSavedSettingsBool("weaponsRapidFire", value); }
+        }
         public static bool WeaponsUnlimitedAmmo
         {
             get { return GetSettingsBool("weaponsUnlimitedAmmo"); }

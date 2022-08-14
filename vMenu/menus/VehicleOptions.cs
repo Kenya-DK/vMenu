@@ -45,6 +45,7 @@ namespace vMenuClient
         public bool FlashHighbeamsOnHonk { get; private set; } = UserDefaults.VehicleHighbeamsOnHonk;
         public bool DisablePlaneTurbulence { get; private set; } = UserDefaults.VehicleDisablePlaneTurbulence;
         public bool VehicleBikeSeatbelt { get; private set; } = UserDefaults.VehicleBikeSeatbelt;
+        public bool VehicleBoost { get; private set; } = UserDefaults.VehicleBoost;
         public bool VehicleInfiniteFuel { get; private set; } = false;
         public bool VehicleShowHealth { get; private set; } = false;
         public bool VehicleFrozen { get; private set; } = false;
@@ -52,6 +53,7 @@ namespace vMenuClient
         public bool VehiclePowerMultiplier { get; private set; } = false;
         public float VehicleTorqueMultiplierAmount { get; private set; } = 2f;
         public float VehiclePowerMultiplierAmount { get; private set; } = 2f;
+
 
         private Dictionary<MenuItem, int> vehicleExtras = new Dictionary<MenuItem, int>();
         #endregion
@@ -76,6 +78,7 @@ namespace vMenuClient
             MenuCheckboxItem vehicleNeverDirty = new MenuCheckboxItem("Keep Vehicle Clean", "This will constantly clean your car if the vehicle dirt level goes above 0. Note that this only cleans ~o~dust~s~ or ~o~dirt~s~. This does not clean mud, snow or other ~r~damage decals~s~. Repair your vehicle to remove them.", VehicleNeverDirty);
             MenuCheckboxItem vehicleBikeSeatbelt = new MenuCheckboxItem("Bike Seatbelt", "Prevents you from being knocked off your bike, bicyle, ATV or similar.", VehicleBikeSeatbelt);
             MenuCheckboxItem vehicleEngineAO = new MenuCheckboxItem("Engine Always On", "Keeps your vehicle engine on when you exit your vehicle.", VehicleEngineAlwaysOn);
+            MenuCheckboxItem vehicleBoost = new MenuCheckboxItem("Vehicle Boost", "Makes your vehicle fast.", VehicleBoost);
             MenuCheckboxItem vehicleNoTurbulence = new MenuCheckboxItem("Disable Plane Turbulence", "Disables the turbulence for all planes. Note only works for planes. Helicopters and other flying vehicles are not supported.", DisablePlaneTurbulence);
             MenuCheckboxItem vehicleNoSiren = new MenuCheckboxItem("Disable Siren", "Disables your vehicle's siren. Only works if your vehicle actually has a siren.", VehicleNoSiren);
             MenuCheckboxItem vehicleNoBikeHelmet = new MenuCheckboxItem("No Bike Helmet", "No longer auto-equip a helmet when getting on a bike or quad.", VehicleNoBikeHelemet);
@@ -286,6 +289,10 @@ namespace vMenuClient
             {
                 menu.AddMenuItem(cleanVehicle); // CLEAN VEHICLE
                 menu.AddMenuItem(setDirtLevel); // SET DIRT LEVEL
+            }
+            if (IsAllowed(Permission.VOBoost)) // MOD MENU
+            {
+                menu.AddMenuItem(vehicleBoost);
             }
             if (IsAllowed(Permission.VOMod)) // MOD MENU
             {
@@ -632,6 +639,10 @@ namespace vMenuClient
                 else if (item == infiniteFuel)
                 {
                     VehicleInfiniteFuel = _checked;
+                }
+                else if (item == vehicleBoost)
+                {
+                    VehicleBoost = _checked;
                 }
             };
             #endregion
