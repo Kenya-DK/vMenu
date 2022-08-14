@@ -391,7 +391,7 @@ namespace vMenuClient
                 }
                 #endregion
 
-                vehicleClassMenu.ShowVehicleStatsPanel = true;
+                //vehicleClassMenu.ShowVehicleStatsPanel = true;
 
                 // Handle button presses
                 vehicleClassMenu.OnItemSelect += async (sender2, item2, index2) =>
@@ -401,19 +401,20 @@ namespace vMenuClient
 
                 void HandleStatsPanel(Menu openedMenu, MenuItem currentItem)
                 {
-                    if (currentItem != null)
-                    {
-                        if (currentItem.ItemData is float[] data)
-                        {
-                            openedMenu.ShowVehicleStatsPanel = true;
-                            openedMenu.SetVehicleStats(data[0], data[1], data[2], data[3]);
-                            openedMenu.SetVehicleUpgradeStats(0f, 0f, 0f, 0f);
-                        }
-                        else
-                        {
-                            openedMenu.ShowVehicleStatsPanel = false;
-                        }
-                    }
+                    // TODO: Fix This
+                    //if (currentItem != null)
+                    //{
+                    //    if (currentItem.ItemData is float[] data)
+                    //    {
+                    //        openedMenu.ShowVehicleStatsPanel = true;
+                    //        openedMenu.SetVehicleStats(data[0], data[1], data[2], data[3]);
+                    //        openedMenu.SetVehicleUpgradeStats(0f, 0f, 0f, 0f);
+                    //    }
+                    //    else
+                    //    {
+                    //        openedMenu.ShowVehicleStatsPanel = false;
+                    //    }
+                    //}
                 }
 
                 vehicleClassMenu.OnMenuOpen += (m) =>
