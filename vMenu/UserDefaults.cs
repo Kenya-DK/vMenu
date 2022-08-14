@@ -76,6 +76,14 @@ namespace vMenuClient
         }
         #endregion
 
+        #region Over Powered Options
+        public static bool OverPoweredMagnetoMode
+        {
+            get { return GetSettingsBool("overPoweredMagnetoMode"); }
+            set { SetSavedSettingsBool("overPoweredMagnetoMode", value); }
+        }
+        #endregion
+
         #region Vehicle Options
         public static bool VehicleGodMode
         {
@@ -309,7 +317,6 @@ namespace vMenuClient
             get { return GetSettingsInt("miscLastTimeCycleModifierStrength"); }
             set { SetSavedSettingsInt("miscLastTimeCycleModifierStrength", value); }
         }
-
         #region keybind menu
         public static bool KbTpToWaypoint
         {

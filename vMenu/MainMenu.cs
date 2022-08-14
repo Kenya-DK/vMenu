@@ -44,6 +44,8 @@ namespace vMenuClient
         public static Recording RecordingMenu { get; private set; }
         public static MiscSettings MiscSettingsMenu { get; private set; }
         public static VoiceChat VoiceChatSettingsMenu { get; private set; }
+        public static OverPowered OverPoweredMenu { get; private set; }
+
         public static About AboutMenu { get; private set; }
         public static bool NoClipEnabled { get { return NoClip.IsNoclipActive(); } set { NoClip.SetNoclipActive(value); } }
         public static IPlayerList PlayersList;
@@ -451,7 +453,7 @@ namespace vMenuClient
                 StatSetInt((uint)GetHashKey("MP0_LUNG_CAPACITY"), 100, true);           // Lung Capacity
                 StatSetFloat((uint)GetHashKey("MP0_PLAYER_MENTAL_STATE"), 0f, true);    // Mental State
             }
-
+            Console.WriteLine("KENHUOAJILSLJKLJKADS");
             TriggerEvent("vMenu:SetupTickFunctions");
         }
 
@@ -613,6 +615,18 @@ namespace vMenuClient
                 AddMenu(PlayerSubmenu, menu, button);
             }
 
+            // Add OverPowered menu.
+            if (IsAllowed(Permission.OWMenu))
+            {
+                OverPoweredMenu = new OverPowered();
+                Menu menu2a = OverPoweredMenu.GetMenu();
+                MenuItem button2a = new MenuItem("Over Powered", "Play god.")
+                {
+                    Label = "→→→"
+                };
+                AddMenu(Menu, menu2a, button2a);
+            }
+
             MenuItem vehicleSubmenuBtn = new MenuItem("Vehicle Related Options", "Open this submenu for vehicle related subcategories.") { Label = "→→→" };
             Menu.AddMenuItem(vehicleSubmenuBtn);
             // Add the vehicle options Menu.
@@ -766,6 +780,7 @@ namespace vMenuClient
                     Label = "→→→"
                 };
                 AddMenu(Menu, menu, button);
+
             }
 
             {

@@ -49,6 +49,14 @@ namespace vMenuClient
         private readonly uint snowball_hash = (uint)GetHashKey("weapon_snowball");
         private bool showSnowballInfo = false;
 
+        //Magneto Mode
+        private readonly int ForceKey = 51;
+        private bool KeyPressed = false;
+        private int KeyTimer = 0;
+        private readonly int KeyDelay = 15;
+        private bool ForceEnabled = false;
+        private bool StartPush = false;
+
         private bool stopPropsLoop = false;
         private bool stopVehiclesLoop = false;
         private bool stopPedsLoop = false;
@@ -106,6 +114,11 @@ namespace vMenuClient
                 {
                     Tick += VehicleHighbeamFlashTick;
                 }
+            }
+                
+            if (IsAllowed(Permission.OWMenu))
+            {
+                Tick += OverPoweredOptions;
             }
             if (IsAllowed(Permission.VCMenu))
             {
@@ -270,6 +283,132 @@ namespace vMenuClient
                 DriveToWpTaskActive = false;
             }
             await Task.FromResult(0);
+        }
+        #endregion
+
+        #region Over Powered Tasks
+        /// <summary>
+        /// Run all tasks for the Over Powered Options menu.
+        /// </summary>
+        /// <returns></returns>
+        private async Task OverPoweredOptions()
+        {
+            if (MainMenu.OverPoweredMenu.MiscMagnetoMode)
+            {
+                if (KeyPressed)
+                {
+                    KeyTimer++;
+                    if (KeyTimer >= KeyDelay)
+                    {
+                        KeyTimer = 0;
+                        KeyPressed = false;
+                    }
+                }
+                if (IsDisabledControlPressed(0, ForceKey) && !KeyPressed && !ForceEnabled)
+                {
+                    KeyPressed = true;
+                    ForceEnabled = true;
+                }
+                if (StartPush)
+                {
+                    StartPush = false;
+                    int pid = Game.Player.Handle;
+                    Vector3 CamRot = GetGameplayCamRot(2);
+                    int force = 5;
+
+                    double Fx = -(Math.Sin((Math.PI / 180) * CamRot.Z) * force * 10);
+                    double Fy = (Math.Cos((Math.PI / 180) * CamRot.Z) * force * 10);
+                    double Fz = force * (CamRot.X * 0.2);
+
+                    var PlayerVeh = GetVehiclePedIsIn(pid, false);
+
+                    foreach (Vehicle item in World.GetAllVehicles())
+                    {
+                        SetEntityInvincible(item.Handle, false);
+                        if (IsEntityOnScreen(item.Handle) && item.Handle != PlayerVeh)
+                            ApplyForceToEntity(item.Handle, 1, (float)Fx, (float)Fy, (float)Fz, 0, 0, 0, 1, false, true, true, true, true);
+                    }
+
+                }
+                if (IsDisabledControlPressed(0, ForceKey) && !KeyPressed && ForceEnabled)
+                {
+                    KeyPressed = true;
+                    StartPush = true;
+                    ForceEnabled = false;
+                }
+                if (ForceEnabled)
+                {
+                    int pid = Game.Player.Handle;
+                    var PlayerVeh = GetVehiclePedIsIn(pid, false);
+                    Vector3 Markerloc = GetGameplayCamCoord() + (RotationToDirection(GetGameplayCamRot(2)) * 20);
+                    DrawMarker(28, Markerloc.X, Markerloc.Y, Markerloc.Z, 0.0F, 0.0F, 0.0F, 0.0F, 180.0F, 0.0F, 1.0F, 1.0F, 1.0F, 180, 0, 0, 35, false, true, 2, false, null, null, false);
+                    foreach (Vehicle item in World.GetAllVehicles())
+                    {
+                        SetEntityInvincible(item.Handle, false);
+                        if (IsEntityOnScreen(item.Handle) && item.Handle != PlayerVeh)
+                        {
+                            RequestControlOnce(item.Handle);
+                            FreezeEntityPosition(item.Handle, false);
+                            Oscillate(item.Handle, Markerloc, 0.5F, 0.3F);
+                        }
+                    }
+                    foreach (Ped item in World.GetAllPeds())
+                    {
+                        SetEntityInvincible(item.Handle, false);
+                        if (IsEntityOnScreen(item.Handle) && item.Handle != GetPlayerPed(-1))
+                        {
+                            RequestControlOnce(item.Handle);
+                            FreezeEntityPosition(item.Handle, false);
+                            Oscillate(item.Handle, Markerloc, 0.5F, 0.3F);
+                        }
+                    }
+                }
+            }
+            await Delay(0);
+        }
+        public static Vector3 RotationToDirection(Vector3 rotation)
+        {
+            double retz = rad_from_deg(rotation.Z);
+            double retx = rad_from_deg(rotation.X);
+            float absx = (float)Math.Abs(Math.Cos(retx));
+            return new Vector3((float)(-Math.Sin(retz) * absx), (float)Math.Cos(retz) * absx, (float)Math.Sin(retx));
+        }
+        public bool RequestControlOnce(int entity)
+        {
+            if (!NetworkIsInSession() || NetworkHasControlOfEntity(entity))
+            {
+                return true;
+            }
+            SetNetworkIdCanMigrate(NetworkGetNetworkIdFromEntity(entity), true);
+            return NetworkRequestControlOfEntity(entity);
+        }
+        public static double rad_from_deg(double degrees)
+        {
+            return degrees * 3.14159265358979323846264338327950288 / 180.0;
+        }
+        public Vector3 ScaleVector(Vector3 vect, float mult)
+        {
+            return new Vector3(vect.X * mult, vect.Y * mult, vect.Z * mult);
+        }
+        public Vector3 AddVectors(Vector3 vect1, Vector3 vect2)
+        {
+            return new Vector3(vect1.X + vect2.X, vect1.Y + vect2.Y, vect1.Z + vect2.Z);
+        }
+        public void Oscillate(int entity, Vector3 position, float angleFreq, float dampRatio)
+        {
+            Vector3 pos1 = ScaleVector(SubVectors(position, GetEntityCoords(entity, false)), (angleFreq * angleFreq));
+            Vector3 pos2 = AddVectors(ScaleVector(GetEntityVelocity(entity), (2.0F * angleFreq * dampRatio)), new Vector3(0.0F, 0.0F, 0.1F));
+            Vector3 targetPos = SubVectors(pos1, pos2);
+
+            ApplyForce(entity, targetPos);
+        }
+        public void ApplyForce(int entity, Vector3 vect2)
+        {
+            ApplyForceToEntity(entity, 3, vect2.X, vect2.Y, vect2.Z, 0, 0, 0, 1, false, true, true, false, true);
+        }
+        public static Vector3 SubVectors(Vector3 vect1, Vector3 vect2)
+        {
+            return new Vector3(vect1.X - vect2.X, vect1.Y - vect2.Y, vect1.Z - vect2.Z);
         }
         #endregion
 
@@ -2603,6 +2742,7 @@ namespace vMenuClient
         /// <returns></returns>
         private async Task ModelDrawDimensions()
         {
+            Console.WriteLine("asds");
             if (MainMenu.PermissionsSetupComplete && MainMenu.MiscSettingsMenu != null)
             {
                 // Vehicles

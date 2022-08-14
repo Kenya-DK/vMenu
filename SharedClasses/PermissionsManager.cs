@@ -64,6 +64,11 @@ namespace vMenuShared
             POUnlimitedStamina,
             #endregion
 
+            #region Over Powered
+            OWMenu,
+            OWAll,
+            OWMagnetoMode,
+            #endregion
             // Vehicle Options
             #region vehicle options
             VOMenu,
@@ -329,7 +334,7 @@ namespace vMenuShared
             MSThermalVision,
             MSLocationBlips,
             MSPlayerBlips,
-            MSOverheadNames,
+            MSOverheadNames,            
             MSTeleportLocations,
             MSTeleportSaveLocation,
             MSConnectionMenu,
@@ -569,6 +574,9 @@ namespace vMenuShared
                     break;
                 case "PO":
                     prefix += "PlayerOptions";
+                    break;
+                case "OW":
+                    prefix += "OverPoweredOptions";
                     break;
                 case "VO":
                     prefix += "VehicleOptions";
