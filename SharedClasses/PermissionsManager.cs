@@ -296,10 +296,15 @@ namespace vMenuShared
             WPStoneHatchet, // xmas 2018 dlc (1604)
             WPCeramicPistol, // xmas 2019 dlc (1868)
             WPNavyRevolver, // xmas 2019 dlc (1868)
-            //WPHazardCan, // xmas 2019 dlc (1868) (Does not have label text)
+            WPHazardCan, // xmas 2019 dlc (1868) 
             WPPericoPistol, // xmas 2020 dlc (2189)
             WPMilitaryRifle, // xmas 2020 dlc (2189)
             WPCombatShotgun, // xmas 2020 dlc (2189)
+            WPHeavyRifle,// xmas 2021 dlc (2545)
+            WPEmpLauncher,// xmas 2021 dlc (2545)
+            WPFertilizerCan,// xmas 2021 dlc (2545)
+            WPPrecisionRifle,// xmas 2022 dlc (2699)
+            WPTacticalRifle,// xmas 2022 dlc (2699)
             #endregion
 
             // Weapon Loadouts Menu

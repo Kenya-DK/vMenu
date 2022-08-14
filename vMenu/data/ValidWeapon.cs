@@ -218,7 +218,14 @@ namespace vMenuClient
             // DLC CHRISTMAS2020 (v 2189)
             { "weapon_gadgetpistol", GetLabelText("WTD_GDGTPST") },
             { "weapon_militaryrifle", GetLabelText("WTD_MLTRYRFL") },
-            { "weapon_combatshotgun", GetLabelText("WTD_CMBSHGN") }
+            { "weapon_combatshotgun", GetLabelText("WTD_CMBSHGN") },
+            // DLC CHRISTMAS2021 (v 2545)
+            { "weapon_heavyrifle", GetLabelText("WTD_HEAVYRIFLE") },
+            { "weapon_emplauncher", GetLabelText("WTD_EMPL") },
+            { "weapon_fertilizercan", GetLabelText("WTD_FERTILIZERCAN") },
+            // DLC CHRISTMAS2022 (v 2699)
+            { "weapon_precisionrifle", GetLabelText("WTD_PRCSRIFLE") },
+            { "weapon_tacticalrifle", GetLabelText("WTD_TACRIFLE") }
         };
 
         public static readonly Dictionary<string, string> weaponNames = new Dictionary<string, string>()
@@ -317,11 +324,18 @@ namespace vMenuClient
             // DLC CHRISTMAS2019 (v 1868)
             { "weapon_ceramicpistol", GetLabelText("WT_CERPST") },
             { "weapon_navyrevolver", GetLabelText("WT_REV_NV") },
-            //{ "weapon_hazardcan", GetLabelText("WT_") }, (Does not have label text)
+            { "weapon_hazardcan", GetLabelText("WTD_HAZARDCAN") },
             // DLC CHRISTMAS2020 (v 2189)
             { "weapon_gadgetpistol", GetLabelText("WT_GDGTPST") },
             { "weapon_militaryrifle", GetLabelText("WT_MLTRYRFL") },
-            { "weapon_combatshotgun", GetLabelText("WT_CMBSHGN") }
+            { "weapon_combatshotgun", GetLabelText("WT_CMBSHGN") },
+            // DLC CHRISTMAS2021 (v 2545)
+            { "weapon_heavyrifle", GetLabelText("WT_HEAVYRIFLE") },
+            { "weapon_emplauncher", GetLabelText("WT_EMPL") },
+            { "weapon_fertilizercan", GetLabelText("WT_FERTILIZERCAN") },
+            // DLC CHRISTMAS2022 (v 2699)
+            { "weapon_precisionrifle", GetLabelText("WT_PRCSRIFLE") },
+            { "weapon_tacticalrifle", GetLabelText("WT_TACRIFLE") },
         };
         #endregion
 
@@ -422,11 +436,19 @@ namespace vMenuClient
             // DLC CHRISTMAS2019 (v 1868)
             ["weapon_ceramicpistol"] = Permission.WPCeramicPistol,
             ["weapon_navyrevolver"] = Permission.WPNavyRevolver,
-            //["weapon_hazardcan"] = Permission.WPHazardCan, (Does not have label text)
+            ["weapon_hazardcan"] = Permission.WPHazardCan,
             // DLC CHRISTMAS2020 (v 2189)
             ["weapon_gadgetpistol"] = Permission.WPPericoPistol,
             ["weapon_militaryrifle"] = Permission.WPMilitaryRifle,
             ["weapon_combatshotgun"] = Permission.WPCombatShotgun,
+            // DLC CHRISTMAS2021 (v 2545)
+            ["weapon_heavyrifle"] = Permission.WPHeavyRifle,
+            ["weapon_emplauncher"] = Permission.WPEmpLauncher,
+            ["weapon_fertilizercan"] = Permission.WPFertilizerCan,
+            // DLC CHRISTMAS2022 (v 2699)
+            ["weapon_precisionrifle"] = Permission.WPPrecisionRifle,
+            ["weapon_tacticalrifle"] = Permission.WPTacticalRifle,
+
         };
         #endregion
 
@@ -790,7 +812,20 @@ namespace vMenuClient
             ["COMPONENT_VINTAGEPISTOL_CLIP_01"] = GetLabelText("WCT_CLIP1"),
             ["COMPONENT_VINTAGEPISTOL_CLIP_02"] = GetLabelText("WCT_CLIP2"),
             // CHRISTMAS 2018 DLC (v 1604)
-            ["COMPONENT_RAYPISTOL_VARMOD_XMAS18"] = GetLabelText("WCT_VAR_RAY18")
+            ["COMPONENT_RAYPISTOL_VARMOD_XMAS18"] = GetLabelText("WCT_VAR_RAY18"),
+            // DLC CHRISTMAS2019 (v 1868)
+            ["COMPONENT_CERAMICPISTOL_CLIP_01"] = GetLabelText("WCT_CLIP1"),
+            ["COMPONENT_CERAMICPISTOL_CLIP_02"] = GetLabelText("WCT_CLIP2"),
+            ["COMPONENT_CERAMICPISTOL_SUPP"] = GetLabelText("WCT_SUPP"),
+            // DLC CHRISTMAS2020 (v 2189)
+            ["COMPONENT_MILITARYRIFLE_CLIP_01"] = GetLabelText("WCT_CLIP1"),
+            ["COMPONENT_MILITARYRIFLE_CLIP_02"] = GetLabelText("WCT_CLIP2"),
+            ["COMPONENT_MILITARYRIFLE_SIGHT_01"] = GetLabelText("WCT_MRFL_SIGHT"),
+            // DLC CHRISTMAS2021 (v 2545)
+            ["COMPONENT_PRECISIONRIFLE_CLIP_01"] = GetLabelText("WCT_CLIP1"),
+            ["COMPONENT_TACTICALRIFLE_CLIP_01"] = GetLabelText("WCT_CLIP1"),
+            ["COMPONENT_TACTICALRIFLE_CLIP_02"] = GetLabelText("WCT_CLIP2"),
+            ["COMPONENT_AT_AR_FLSH_REH"] = GetLabelText("WCT_FLASH"),
         };
         #endregion
 
