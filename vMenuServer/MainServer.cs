@@ -793,6 +793,58 @@ namespace vMenuServer
         }
 
         /// <summary>
+        /// Revive a specific player.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        [EventHandler("vMenu:RevivePlayer")]
+        private void RevivePlayer([FromSource] Player source, int target)
+        {
+            if (IsPlayerAceAllowed(source.Handle, "vMenu.OnlinePlayers.Revive") || IsPlayerAceAllowed(source.Handle, "vMenu.Everything") ||
+                IsPlayerAceAllowed(source.Handle, "vMenu.OnlinePlayers.All"))
+            {
+                // Trigger the client event on the target player to make them teleport to the source player.
+                Player targetPlayer = Players[target];
+                if (targetPlayer != null)
+                {
+                    TriggerClientEvent(player: targetPlayer, eventName: "vMenu:Revive", args: source.Name);
+                    return;
+                }
+                TriggerClientEvent(player: source, eventName: "vMenu:Notify", args: "An unknown error occurred. Report it here: vespura.com/vmenu");
+            }
+            else
+            {
+                BanManager.BanCheater(source);
+            }
+        }
+        /// <summary>
+        /// Heal a specific player
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        [EventHandler("vMenu:HealPlayer")]
+        private void HealPlayer([FromSource] Player source, int target)
+        {
+            if (IsPlayerAceAllowed(source.Handle, "vMenu.OnlinePlayers.Heal") || IsPlayerAceAllowed(source.Handle, "vMenu.Everything") ||
+                IsPlayerAceAllowed(source.Handle, "vMenu.OnlinePlayers.All"))
+            {
+                // Trigger the client event on the target player to make them teleport to the source player.
+                Player targetPlayer = Players[target];
+                if (targetPlayer != null)
+                {
+                    TriggerClientEvent(player: targetPlayer, eventName: "vMenu:Heal", args: source.Name);
+                    return;
+                }
+                TriggerClientEvent(player: source, eventName: "vMenu:Notify", args: "An unknown error occurred. Report it here: vespura.com/vmenu");
+            }
+            else
+            {
+                BanManager.BanCheater(source);
+            }
+        }
+
+
+        /// <summary>
         /// Teleport a specific player to another player.
         /// </summary>
         /// <param name="source"></param>

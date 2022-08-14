@@ -42,6 +42,8 @@ namespace vMenuClient
             MenuItem summon = new MenuItem("Summon Player", "Teleport the player to you.");
             MenuItem toggleGPS = new MenuItem("Toggle GPS", "Enables or disables the GPS route on your radar to this player.");
             MenuItem spectate = new MenuItem("Spectate Player", "Spectate this player. Click this button again to stop spectating.");
+            MenuItem revive = new MenuItem("~g~Revive Player", "Will Player revive the player");
+            MenuItem heal = new MenuItem("~g~Heal Player", "Heal this player, Will also be logged in the Staff Actions log.");
             MenuItem printIdentifiers = new MenuItem("Print Identifiers", "This will print the player's identifiers to the client console (F8). And also save it to the CitizenFX.log file.");
             MenuItem kill = new MenuItem("~r~Kill Player", "Kill this player, note they will receive a notification saying that you killed them. It will also be logged in the Staff Actions log.");
             MenuItem kick = new MenuItem("~r~Kick Player", "Kick the player from the server.");
@@ -64,6 +66,15 @@ namespace vMenuClient
             {
                 playerMenu.AddMenuItem(spectate);
             }
+            if (IsAllowed(Permission.OPRevive))
+            {
+                playerMenu.AddMenuItem(revive);
+            }
+            if (IsAllowed(Permission.OPHeal))
+            {
+                playerMenu.AddMenuItem(heal);
+            }
+
             if (IsAllowed(Permission.OPWaypoint))
             {
                 playerMenu.AddMenuItem(toggleGPS);
@@ -142,10 +153,20 @@ namespace vMenuClient
                     else
                         Notify.Error("You can't summon yourself.");
                 }
-                // spectating
+                // Spectating
                 else if (item == spectate)
                 {
                     SpectatePlayer(currentPlayer);
+                }
+                // Revive
+                else if (item == revive)
+                {
+                    RevivePlayer(currentPlayer);
+                }
+                // Heal
+                else if (item == heal)
+                {
+                    HealPlayer(currentPlayer);
                 }
                 // kill button
                 else if (item == kill)

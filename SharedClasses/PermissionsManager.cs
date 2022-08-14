@@ -28,6 +28,8 @@ namespace vMenuShared
             OPTeleport,
             OPWaypoint,
             OPSpectate,
+            OPRevive,
+            OPHeal,
             OPIdentifiers,
             OPSummon,
             OPKill,

@@ -37,6 +37,8 @@ namespace vMenuClient
             EventHandlers.Add("vMenu:SetPermissions", new Action<string>(MainMenu.SetPermissions));
             EventHandlers.Add("vMenu:GoToPlayer", new Action<string>(SummonPlayer));
             EventHandlers.Add("vMenu:KillMe", new Action<string>(KillMe));
+            EventHandlers.Add("vMenu:Revive", new Action<string>(Revive));
+            EventHandlers.Add("vMenu:Heal", new Action<string>(Heal));
             EventHandlers.Add("vMenu:Notify", new Action<string>(NotifyPlayer));
             EventHandlers.Add("vMenu:SetClouds", new Action<float, string>(SetClouds));
             EventHandlers.Add("vMenu:GoodBye", new Action(GoodBye));
@@ -275,6 +277,27 @@ namespace vMenuClient
         {
             Notify.Alert($"You have been killed by <C>{GetSafePlayerName(sourceName)}</C>~s~ using the ~r~Kill Player~s~ option in vMenu.");
             SetEntityHealth(Game.PlayerPed.Handle, 0);
+        }
+
+        /// <summary>
+        /// Revive this player
+        /// </summary>
+        private void Revive(string sourceName)
+        {
+            Notify.Alert($"You have been revive by <C>{GetSafePlayerName(sourceName)}</C>~s~ using the ~r~Revive Player~s~ option in vMenu.");
+            SetEntityCoordsNoOffset(Game.PlayerPed.Handle, Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y, Game.PlayerPed.Position.Z,false,false,true);
+            NetworkResurrectLocalPlayer(Game.PlayerPed.Position.X, Game.PlayerPed.Position.Y, Game.PlayerPed.Position.Z, Game.PlayerPed.Heading, true, false);
+            ClearPedBloodDamage(Game.PlayerPed.Handle);
+            SetEntityHealth(Game.PlayerPed.Handle, 200);
+        }
+
+        /// <summary>
+        /// Heal this player
+        /// </summary>
+        private void Heal(string sourceName)
+        {
+            Notify.Alert($"You have been heal by <C>{GetSafePlayerName(sourceName)}</C>~s~ using the ~r~Heal Player~s~ option in vMenu.");
+            SetEntityHealth(Game.PlayerPed.Handle, 200);
         }
 
         /// <summary>

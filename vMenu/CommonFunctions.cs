@@ -933,6 +933,21 @@ namespace vMenuClient
         }
         #endregion
 
+
+        #region Revive Player
+        /// <summary>
+        /// Revive player.
+        /// </summary>
+        /// <param name="player"></param>
+        public static void RevivePlayer(IPlayer player) => TriggerServerEvent("vMenu:RevivePlayer", player.ServerId);
+        #endregion
+        #region Heal Player
+        /// <summary>
+        /// Heal player.
+        /// </summary>
+        /// <param name="player"></param>
+        public static void HealPlayer(IPlayer player) => TriggerServerEvent("vMenu:HealPlayer", player.ServerId);
+        #endregion  
         #region Summon Player
         /// <summary>
         /// Summon player.
@@ -940,7 +955,6 @@ namespace vMenuClient
         /// <param name="player"></param>
         public static void SummonPlayer(IPlayer player) => TriggerServerEvent("vMenu:SummonPlayer", player.ServerId);
         #endregion
-
         #region Spectate function
         private static int currentlySpectatingPlayer = -1;
         public static async void SpectatePlayer(IPlayer player, bool forceDisable = false)
