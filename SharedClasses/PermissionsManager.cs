@@ -66,11 +66,18 @@ namespace vMenuShared
             POUnlimitedStamina,
             #endregion
 
+            // Over Powered Options
             #region Over Powered
             OWMenu,
             OWAll,
             OWMagnetoMode,
             #endregion
+
+            #region Developer Options
+            DTMenu,
+            DTAll,
+            #endregion
+
             // Vehicle Options
             #region vehicle options
             VOMenu,
@@ -612,6 +619,9 @@ namespace vMenuShared
                     break;
                 case "MS":
                     prefix += "MiscSettings";
+                    break;
+                case "DT":
+                    prefix += "DeveloperOptions";
                     break;
                 case "VC":
                     prefix += "VoiceChat";

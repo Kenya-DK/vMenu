@@ -18,6 +18,10 @@ namespace vMenuClient
         private Menu developerToolsMenu;
         private Menu entitySpawnerMenu;
 
+        // Submenus
+        public DeveloperTools DeveloperToolsMenu { get; private set; }
+
+        // Public variables (getters only), return the private variables.
         public bool ShowSpeedoKmh { get; private set; } = UserDefaults.MiscSpeedKmh;
         public bool ShowSpeedoMph { get; private set; } = UserDefaults.MiscSpeedMph;
         public bool ShowCoordinates { get; private set; } = false;
@@ -81,6 +85,18 @@ namespace vMenuClient
 
             // Create the menu.
             menu = new Menu(Game.Player.Name, "Misc Settings");
+
+            #region Submenus
+            // Submenu's
+            // Add the developer tools menu.
+            if (IsAllowed(Permission.DTMenu))
+            {
+                DeveloperToolsMenu = new DeveloperTools();
+                Menu devMenu = DeveloperToolsMenu.GetMenu();
+                MenuController.AddSubmenu(menu, devMenu);
+            }
+            #endregion
+
             teleportOptionsMenu = new Menu(Game.Player.Name, "Teleport Options");
             developerToolsMenu = new Menu(Game.Player.Name, "Development Tools");
             entitySpawnerMenu = new Menu(Game.Player.Name, "Entity Spawner");
